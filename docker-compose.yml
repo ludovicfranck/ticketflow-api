@@ -9,11 +9,14 @@ services:
       POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   keycloak:
     image: quay.io/keycloak/keycloak:22.0.1
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       KC_DB: ticketflow
       KC_DB_URL: jdbc:postgresql://postgres:5432/ticketflow
@@ -24,9 +27,12 @@ services:
     ports:
       - "8180:8080"
     command: start-dev
+    networks:
+      - ticketflow-net
 
   minio:
     image: minio/minio
+    container_name: ticketflow-minio
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -34,3 +40,206 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     command: server /data --console-address ":9001"
+    networks:
+      - ticketflow-net
+    volumes:
+      - minio_data:/data
+
+#    -- pour la tracabilite inter-services
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+#  -- pour le monitoring et la surveillance | observabilite
+
+  prometheus:
+    image: prom/prometheus
+    container_name: ticketflow-prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - ticketflow-net
+
+#   Kafka --------------
+
+  zookeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: ticketflow-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - ticketflow-net
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: ticketflow-kafka
+    depends_on:
+      - zookeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+#  pour la visualisation d'evennement
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: ticketflow-kafka-ui
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: ticketflow
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - ticketflow-net
+
+#  eureka-server
+  eureka-server:
+    build: ./eureka-server
+    container_name: ticketflow-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - ticketflow-net
+
+# config-server
+  config-server:
+    build: ./config-server
+    container_name: ticketflow-config
+    ports:
+      - "8888:8888"
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    depends_on:
+      - eureka-server
+    networks:
+      - ticketflow-net
+
+#  ---- user-service
+  user-service:
+    build: ./user-service
+    container_name: ticketflow-user-service
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketflow
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_AUTH_SERVER_URL: http://keycloak:8180
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - ticketflow-net
+# -----ticket-service
+  ticket-service:
+    build: ./ticket-service
+    container_name: ticketflow-ticket-service
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketflow
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - ticketflow-net
+# notification service
+  notification-service:
+    build: ./notification-service
+    container_name: ticketflow-notification-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketflow
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - ticketflow-net
+
+# document service
+  document-service:
+    build: ./document-service
+    container_name: ticketflow-document-service
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketflow
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - ticketflow-net
+
+# api-gateway
+  api-gateway:
+    build: ./api-gateway
+    container_name: ticketflow-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      ticket-service:
+        condition: service_started
+    networks:
+      - ticketflow-net
+networks:
+  ticketflow-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
