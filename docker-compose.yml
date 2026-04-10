@@ -24,6 +24,7 @@ services:
       KC_DB_PASSWORD: password
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB_SCHEMA: keycloak
     ports:
       - "8180:8080"
     command: start-dev
@@ -44,6 +45,22 @@ services:
       - ticketflow-net
     volumes:
       - minio_data:/data
+#  service mini io qui va permettre de creer un bucket au lancement du container Docker puis en cas de creation procede par l'affichage d'un message Bucket cree avec succes dans la console
+  minio-init:
+    image: minio/mc:latest
+    container_name: ticketflow-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set minio http://minio:9000 minioadmin minioadmin;
+      mc mb --ignore-existing minio/ticketflow-bucket;   
+      mc anonymous set public minio/ticketflow-bucket;
+      echo 'Bucket créé avec succes';    
+      "
+    networks:
+      - ticketflow-net
 
 #    -- pour la tracabilite inter-services
   zipkin:
