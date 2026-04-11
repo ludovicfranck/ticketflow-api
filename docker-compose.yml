@@ -79,7 +79,7 @@ services:
 
 #   Kafka --------------
 
-  zookeper:
+  zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: ticketflow-zookeeper
     environment:
@@ -94,7 +94,7 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: ticketflow-kafka
     depends_on:
-      - zookeper
+      - zookeeper
     ports:
       - "9092:9092"
     environment:
@@ -105,7 +105,7 @@ services:
     image: provectuslabs/kafka-ui:latest
     container_name: ticketflow-kafka-ui
     ports:
-      - "8090:8080"
+      - "8070:8070"
     environment:
       KAFKA_CLUSTERS_0_NAME: ticketflow
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
