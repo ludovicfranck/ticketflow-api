@@ -2,5 +2,15 @@ server:
   port: 8082
 
 spring:
-  application:
-    name: ticket-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ticket_service_db
+    username: admin
+    password: admin
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
