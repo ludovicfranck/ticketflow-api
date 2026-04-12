@@ -4,32 +4,45 @@ services:
     container_name: ticketflow-postgres
     restart: always
     environment:
-      POSTGRES_DB: ticketflow
+      POSTGRES_DB: postgres
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin" ] # On teste avec admin
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # le script d'initialisation ici
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    networks:
+      - ticketflow-net
 
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0.1
+    image: quay.io/keycloak/keycloak:26.1.2
     depends_on:
       postgres:
         condition: service_healthy
     environment:
-      KC_DB: ticketflow
-      KC_DB_URL: jdbc:postgresql://postgres:5432/ticketflow
-      KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: password
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: admin
+      KC_DB_PASSWORD: admin
+      KC_DB_SCHEMA: public
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_DB_SCHEMA: keycloak
+      KC_HOSTNAME_STRICT: "false"
+      KC_HTTP_ENABLED: "true"
+
     ports:
       - "8180:8080"
     command: start-dev
     networks:
       - ticketflow-net
+
 
   minio:
     image: minio/minio
@@ -49,6 +62,11 @@ services:
   minio-init:
     image: minio/mc:latest
     container_name: ticketflow-minio-init
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     depends_on:
       minio:
         condition: service_healthy
@@ -91,24 +109,35 @@ services:
       - ticketflow-net
 
   kafka:
-    image: confluentinc/cp-kafka:latest
+    image: confluentinc/cp-kafka:7.4.0
     container_name: ticketflow-kafka
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
     environment:
+      KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      # On définit deux canaux : un pour l'extérieur (localhost) et un pour Docker (kafka)
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:29092,EXTERNAL://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    healthcheck: # pour que les microservices démarrent
+      test: [ "CMD", "kafka-topics" , "--bootstrap-server" , "localhost:9092" , "--list" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - ticketflow-net
 #  pour la visualisation d'evennement
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: ticketflow-kafka-ui
-    ports:
-      - "8070:8070"
     environment:
       KAFKA_CLUSTERS_0_NAME: ticketflow
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
     depends_on:
       - kafka
     networks:
@@ -143,11 +172,9 @@ services:
     ports:
       - "8081:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketflow
-      SPRING_DATASOURCE_USERNAME: admin
-      SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-      SPRING_AUTH_SERVER_URL: http://keycloak:8180
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/user_service_db
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_AUTH_SERVER_URL: http://keycloak:8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
     depends_on:
@@ -166,10 +193,10 @@ services:
     ports:
       - "8082:8082"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketflow
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/ticket_service_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
     depends_on:
@@ -190,10 +217,10 @@ services:
     ports:
       - "8083:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketflow
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/notification_service_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
     depends_on:
@@ -213,10 +240,10 @@ services:
     ports:
       - "8084:8084"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketflow
+      DATABASE_URL: postgresql://admin:admin@postgres:5432/document_service_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       MINIO_URL: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
