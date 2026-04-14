@@ -417,5 +417,3 @@ ticketflow/
 
 ---
 
-*BOAZ-STUDY — Test Technique TicketFlow v1.1*
-*Contact : recrutement@boaz-study.com*
