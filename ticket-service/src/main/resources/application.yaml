@@ -3,5 +3,28 @@ spring:
   application:
     name: ticket-service
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
   config:
     import: "optional:configserver:http://localhost:8888"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userServiceBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 5            # Analyse les 5 dernières requêtes
+        failureRateThreshold: 50        # Ouvre le circuit si 50% échouent
+        waitDurationInOpenState: 10s    # Attend 10s avant de tenter de refermer
+        permittedNumberOfCallsInHalfOpenState: 3
+  retry:
+    instances:
+      userServiceRetry:
+        maxAttempts: 3                  # TKT-002: 3 tentatives avant d'abandonner
+        waitDuration: 2s                # Attend 2s entre chaque essai

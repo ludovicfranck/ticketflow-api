@@ -20,5 +20,4 @@ public class UserResponse {
     private boolean enabled;
     private Set<String> roles;
     private Set<String> permissions;
-
 }
