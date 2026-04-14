@@ -14,14 +14,16 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Entity
-@Table(name = "roles")
+
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
+@Entity @Table(name = "roles")
 public class Role {
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Id
     private String id;
     @Column(unique = true , nullable = false)
     private String name; // "ADMIN" , "AGENT" , "USER"

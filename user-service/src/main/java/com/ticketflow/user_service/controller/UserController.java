@@ -15,15 +15,9 @@ import java.util.Set;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
-
 public class UserController {
 
     private final UserService userService;
-
-    public UserController(UserServiceImplementation userServiceImplementation){
-        this.userService = userServiceImplementation;
-    }
-
     // creer un user ...
     @PostMapping("/users")
     @PreAuthorize("hasAuthority(user:create)")
