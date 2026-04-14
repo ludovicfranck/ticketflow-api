@@ -34,6 +34,8 @@ spring:
         jwt:
           issuer-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}/realms/ticketflow
           jwk-set-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}/realms/ticketflow/protocol/openid-connect/certs
+          authority-prefix: "" #  gestion manuelle dans le code au-dessus
+          authorities-claim-name: authorities
 
 #  Pour l'observabilite ---
 management:
