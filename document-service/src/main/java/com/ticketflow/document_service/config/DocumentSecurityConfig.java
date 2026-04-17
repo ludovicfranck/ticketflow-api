@@ -1,10 +1,7 @@
-package com.ticketflow.notification_service.config;
+package com.ticketflow.document_service.config;
 
-
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,30 +9,32 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
+/**
+ * Cette classe va permettre de gerer la securite en extrayant les permissions ou scopes (authorities ) du token jwt
+ */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
-@Slf4j
-public class NotificationSecurityConfig {
-
+@EnableMethodSecurity
+public class DocumentSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**" ,
-                                "/actuator/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-
+                                "swagger-ui/**",
+                                 "swagger-ui.html",
+                                 "v3/api-docs/**",
+                                 "/actuator/**"
+                        ).permitAll().anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtConverter()))
+                        .jwt( jwt -> jwt.jwtAuthenticationConverter(jwtConverter()))
                 )
+
                 .build();
     }
+
     @Bean
     public JwtAuthenticationConverter jwtConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
@@ -47,6 +46,4 @@ public class NotificationSecurityConfig {
 
         return jwtAuthenticationConverter;
     }
-
-
 }
