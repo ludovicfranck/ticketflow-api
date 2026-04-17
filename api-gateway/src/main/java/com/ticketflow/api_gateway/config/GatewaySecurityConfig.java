@@ -7,6 +7,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.Collections;
@@ -33,18 +34,14 @@ public class GatewaySecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationConverter customJwtConverter(){
-        JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        converter.setJwtGrantedAuthoritiesConverter(jwt -> {
-            Map<String , Object> realmAcces = jwt.getClaim("realm_access");
-            if (realmAcces == null || !realmAcces.containsKey("roles")) return Collections.emptyList();
+    public JwtAuthenticationConverter customJwtConverter() {
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        // Par défaut, on cherche le claim "authorities" ou "scope"
+        // Et il ajoute le préfixe "SCOPE_" (ex: SCOPE_ticket:create)
+        grantedAuthoritiesConverter.setAuthorityPrefix(""); // On enlève le préfixe pour avoir "ticket:create" direct
 
-            @SuppressWarnings("unchecked")
-            List<String> roles = (List<String>) realmAcces.get("roles");
-            return roles.stream()
-                    .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                    .collect(Collectors.toList());
-        });
-        return converter;
+        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+        return jwtAuthenticationConverter;
     }
 }

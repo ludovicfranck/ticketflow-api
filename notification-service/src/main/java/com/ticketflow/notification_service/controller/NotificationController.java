@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
 @Slf4j
+
 public class NotificationController {
     private final NotificationRepository notificationRepository;
 
