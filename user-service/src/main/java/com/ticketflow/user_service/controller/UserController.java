@@ -2,7 +2,6 @@ package com.ticketflow.user_service.controller;
 
 import com.ticketflow.user_service.dto.*;
 import com.ticketflow.user_service.service.UserService;
-import com.ticketflow.user_service.service.UserServiceImplementation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -14,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.Set;
 
 @RestController
