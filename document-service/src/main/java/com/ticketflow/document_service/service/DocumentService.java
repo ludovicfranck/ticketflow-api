@@ -23,13 +23,13 @@ public class DocumentService {
     private final MinioClient minioClient;
     private final DocumentRepository documentRepository;
     private final KafkaTemplate<String , Object> kafkaTemplate;
-    private final String bucketName = "ticketflow-bucket" ;
 
 
     /** Methode permettant d'uploader un document*/
     @Transactional
     public DocumentResponse uploadDocument(MultipartFile multipartFile , String userId) throws Exception{
         // 1 - creation du bucket si il n'existe pas
+        String bucketName = "ticketflow-bucket";
         boolean isBucketCreated = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build());
 
         if (!isBucketCreated){ // bloc de code qui s'execute si le bucket n'a pas ete cree
