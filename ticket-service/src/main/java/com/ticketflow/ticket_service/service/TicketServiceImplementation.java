@@ -18,7 +18,7 @@ import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Component;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

@@ -1,7 +1,5 @@
-package com.ticketflow.user_service.dto;
+package com.ticketflow.ticket_service.dto;
 
-
-import com.ticketflow.user_service.entity.Role;
 import lombok.Builder;
 import lombok.Data;
 
