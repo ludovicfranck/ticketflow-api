@@ -311,7 +311,7 @@ services:
 # api-gateway
   api-gateway:
     build: ./api-gateway
-    container_name: ticketflow-gateway-service
+    container_name: ticketflow-api-gateway
     ports:
       - "8080:8080"
     environment:
