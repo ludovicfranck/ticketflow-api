@@ -77,7 +77,7 @@ spring:
               args:
                 replenishRate: 5
                 burstCapacity: 10
-                keyResolver: "#{@userKeyResolver}
+                keyResolver: "#{@userKeyResolver}"
 
 springdoc:
   swagger-ui:
