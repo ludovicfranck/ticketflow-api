@@ -14,6 +14,9 @@ spring:
 
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true # Permet de trouver les services via Eureka automatiquement
       #      Gestion des Cross Origin Ressource Sharing (CORS)
       globalcors:
         cors-configurations:

@@ -308,29 +308,29 @@ services:
 # api-gateway
   api-gateway:
     build: ./api-gateway
-    container_name: ticketflow-api-gateway
+    container_name: ticketflow-gateway-service
     ports:
       - "8080:8080"
     environment:
       # 1. Configuration du Config Server
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CONFIG_IMPORT: http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
       # 2. Discovery Service
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
       # 3. Sécurité / Keycloak
       KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8180
-      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8180/realms/ticketflow/protocol/openid-connect/token
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8180/realms/ticketflow/
     depends_on:
       eureka-server:
         condition: service_healthy
-      user-service:
-        condition: service_started
-      ticket-service:
-        condition: service_started
-      document-service:
-        condition: service_started
-      notification-service:
-        condition: service_started
+#      user-service:
+#        condition: service_started
+#      ticket-service:
+#        condition: service_started
+#      document-service:
+#        condition: service_started
+#      notification-service:
+#        condition: service_started
       config-server:
         condition: service_started
     networks:
