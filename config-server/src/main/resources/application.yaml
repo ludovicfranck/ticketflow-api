@@ -16,16 +16,34 @@ spring:
           search-locations: file:///D:/PROJETS SPRING BOOT/ticketflow/config-repo
           add-label-location: false
 
+  springdoc:
+    swagger-ui:
+      path: /swagger-ui.html
+      # Cette option active le menu déroulant (dropdown) pour naviguer entre les services
+      urls:
+        - name: user-service
+          url: /api/users/v3/api-docs
+        - name: ticket-service
+          url: /api/tickets/v3/api-docs
+        - name: document-service
+          url: /api/documents/v3/api-docs
+        - name: notification-service
+          url: /api/notifications/v3/api-docs
 #eureka:
 #  client:
 #    service-url:
 #      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health,info,prometheus
-
 logging:
   level:
     org.springframework.cloud.config: DEBUG
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,prometheus,metrics"
+  tracing:
+    sampling:
+      probability: 1.0  # Envoie 100% des traces (pour le dev/test)
+  zipkin:
+    tracing:
+      endpoint: "http://zipkin:9411/api/v2/spans"
