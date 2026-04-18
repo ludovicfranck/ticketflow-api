@@ -396,23 +396,23 @@ ticketflow/
 
 ## Technologies utilisées
 
-| Technologie            | Version  | Rôle |
-|------------------------|----------|------|
-| Spring Boot            | 3.5.13   | Framework principal |
+| Technologie            | Version | Rôle |
+|------------------------|--------|------|
+| Spring Boot            | 3.5.13 | Framework principal |
 | Spring Cloud Gateway   | 2025.0.0 | API Gateway reactive |
-| Spring Security OAuth2 | 3.5.0    | Validation JWT ABAC |
-| Keycloak               | 26.0     | IAM, JWT, RBAC |
+| Spring Security OAuth2 | 3.5.0  | Validation JWT ABAC |
+| Keycloak               | 26.0   | IAM, JWT, RBAC |
 | Spring Cloud Netflix Eureka | 2025.0.0 | Service Discovery |
 | Spring Cloud Config    | 2025.0.0 | Configuration centralisée |
 | OpenFeign              | 2025.0.0 | Communication sync déclarative |
-| Resilience4j           | 2.1.0    | CircuitBreaker + Retry + Fallback |
-| Apache Kafka           | 3.5.0    | Message broker async |
-| MinIO                  | 8.5.7    | Stockage S3 compatible |
-| Spring Micrometer + Zipkin | 3.2.0    | Tracing distribué |
-| Prometheus             | latest   | Métriques |
-| Springdoc OpenAPI      | 2.3.0    | Swagger UI |
-| PostgreSQL             | 15       | Base de données |
-| Docker Compose         | --       | Orchestration locale |
+| Resilience4j           | 2.1.0  | CircuitBreaker + Retry + Fallback |
+| Apache Kafka           | 3.5.0  | Message broker async |
+| MinIO                  | 8.5.7  | Stockage S3 compatible |
+| Spring Micrometer + Zipkin | 3.2.0  | Tracing distribué |
+| Prometheus             | latest | Métriques |
+| Springdoc OpenAPI      | 2.3.0  | Swagger UI |
+| PostgreSQL             | 15     | Base de données |
+| Docker Compose         | --     | Orchestration locale |
 
 ---
 
