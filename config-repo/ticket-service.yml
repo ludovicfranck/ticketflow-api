@@ -17,4 +17,4 @@ spring:
 
 management:
   tracing:
-    enabled: true
+    enabled: false

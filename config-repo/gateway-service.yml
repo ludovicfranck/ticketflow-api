@@ -4,7 +4,7 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eureka-server:8761/eureka/
 
 spring:
   application:
@@ -30,7 +30,7 @@ spring:
         #        les requetes api/users/** ->(seront redirige vers) user-service en appelant le load balancer via Eureka
         # ----- user-service-----------
         - id: user-service
-          uri: lb://user-service
+          uri: lb://USER-SERVICE
           predicates:
             - Path=/api/users/**
           filters:
@@ -43,7 +43,7 @@ spring:
                 keyResolver: "#{@userKeyResolver}"
         #-------- ticket-service----------
         - id: ticket-service
-          uri: lb://ticket-service
+          uri: lb://TICKET-SERVICE
           predicates:
             - Path=/api/tickets/**
           filters:
@@ -55,7 +55,7 @@ spring:
                 keyResolver: "#{@userKeyResolver}"
         #-------- notification-service----------
         - id: notification-service
-          uri: lb://notification-service
+          uri: lb://NOTIFICATION-SERVICE
           predicates:
             - Path=/api/notifications/**
           filters:
@@ -67,7 +67,7 @@ spring:
                 keyResolver: "#{@userKeyResolver}"
         #-------- document-service----------
         - id: document-service
-          uri: lb://document-service
+          uri: lb://DOCUMENT-SERVICE
           predicates:
             - Path=/api/documents/**
           filters:
@@ -80,4 +80,4 @@ spring:
 
 management:
   tracing:
-    enabled: true
+    enabled: false
