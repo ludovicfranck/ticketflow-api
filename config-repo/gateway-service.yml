@@ -16,6 +16,7 @@ spring:
     gateway:
       discovery:
         locator:
+          lower-case-service-id: true
           enabled: true # Permet de trouver les services via Eureka automatiquement
       #      Gestion des Cross Origin Ressource Sharing (CORS)
       globalcors:
@@ -77,6 +78,24 @@ spring:
                 replenishRate: 5
                 burstCapacity: 10
                 keyResolver: "#{@userKeyResolver}
+
+springdoc:
+  swagger-ui:
+    # Permet de classer les docs par service dans le dropdown
+    urls:
+      - name: API Gateway (TicketFlow)
+        url: /v3/api-docs
+      - name: User Service
+        url: /user-service/v3/api-docs
+      - name: Ticket Service
+        url: /ticket-service/v3/api-docs
+      - name: Document Service
+        url: /document-service/v3/api-docs
+      - name: Notification Service
+        url: /notification-service/v3/api-docs
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
 
 management:
   tracing:

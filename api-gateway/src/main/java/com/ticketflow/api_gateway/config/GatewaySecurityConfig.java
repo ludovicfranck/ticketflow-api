@@ -23,8 +23,10 @@ public class GatewaySecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/api/users/**").authenticated()
-                                .requestMatchers("/api/tickets/**").authenticated()
+                                .requestMatchers("swagger-ui/**",
+                                        "swagger-ui.html",
+                                        "v3/api-docs/**",
+                                        "/actuator/**").permitAll()
                                 .anyRequest().authenticated()
                         )
                 .oauth2ResourceServer(oauth2 -> oauth2
