@@ -43,7 +43,7 @@ services:
     networks:
       - ticketflow-net
     volumes:
-      - keycloak_data:/opt/keycloak/data # Ajoute ceci
+      - keycloak_data:/opt/keycloak/data
        #keycloak_data:/opt/keycloak/data
 
 
