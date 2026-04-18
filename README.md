@@ -87,9 +87,10 @@ mvn clean package -DskipTests
 ### 2. Lancer toute l'infrastructure en une commande
 
 ```bash
-docker-compose up -d
+docker-compose up -d (pour lancer tous les services )
+docker-compose up -d api-gateway user-service ticket-service notification-service document-service
 ```
-
+La deuxieme commande docker est necessaire au cas ou tous les autres microservices tardent a se lancer 
 Les services démarrent dans l'ordre suivant (géré par `depends_on`) :
 1. PostgreSQL + Zookeeper + Kafka + MinIO
 2. Keycloak (dépend de PostgreSQL)
