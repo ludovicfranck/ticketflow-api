@@ -5,5 +5,25 @@ spring:
   application:
     name: gateway-service
 
-  config:
-    import: "optional:configserver:http://localhost:8888"
+#  config:
+#    import: "optional:configserver:http://config-server:8888/"
+
+
+springdoc:
+  swagger-ui:
+    # Permet de classer les docs par service dans le dropdown
+    path: /swagger-ui.html
+    urls:
+      - name: API Gateway (TicketFlow)
+        url: /v3/api-docs/api-gateway
+      - name: User Service
+        url: /user-service/v3/api-docs
+      - name: Ticket Service
+        url: /ticket-service/v3/api-docs
+      - name: Document Service
+        url: /document-service/v3/api-docs
+      - name: Notification Service
+        url: /notification-service/v3/api-docs
+  api-docs:
+    enabled: true
+    path: /v3/api-docs

@@ -22,6 +22,7 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
+            allowedOriginPatterns: "*"
             allowedOrigins: "http://localhost:3000" #[OPTIONS] http://localhost:8080/api/users qui doit etre permis.
             allowedMethods: [ "GET","POST","PUT","OPTIONS" ]
             allowedHeaders: "*"
@@ -80,15 +81,12 @@ spring:
                 keyResolver: "#{@userKeyResolver}"
 
 springdoc:
-  api-docs:
-    path: /v3/api-docs
-    enabled: true
   swagger-ui:
     # Permet de classer les docs par service dans le dropdown
     path: /swagger-ui.html
     urls:
       - name: API Gateway (TicketFlow)
-        url: /v3/api-docs
+        url: /v3/api-docs/api-gateway
       - name: User Service
         url: /user-service/v3/api-docs
       - name: Ticket Service
@@ -97,7 +95,9 @@ springdoc:
         url: /document-service/v3/api-docs
       - name: Notification Service
         url: /notification-service/v3/api-docs
-
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
 #---------Zipkin
 management:
   tracing:

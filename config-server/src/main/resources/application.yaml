@@ -15,20 +15,6 @@ spring:
         native:
           search-locations: file:/app/config-repo
           add-label-location: false
-
-  springdoc:
-    swagger-ui:
-      path: /swagger-ui.html
-      # Cette option active le menu déroulant (dropdown) pour naviguer entre les services
-      urls:
-        - name: user-service
-          url: /api/users/v3/api-docs
-        - name: ticket-service
-          url: /api/tickets/v3/api-docs
-        - name: document-service
-          url: /api/documents/v3/api-docs
-        - name: notification-service
-          url: /api/notifications/v3/api-docs
 #eureka:
 #  client:
 #    service-url:
