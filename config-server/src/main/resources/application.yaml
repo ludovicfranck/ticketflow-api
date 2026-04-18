@@ -13,7 +13,7 @@ spring:
     config:
       server:
         native:
-          search-locations: file:///D:/PROJETS SPRING BOOT/ticketflow/config-repo
+          search-locations: file:/app/config-repo
           add-label-location: false
 
   springdoc:
@@ -36,6 +36,10 @@ spring:
 logging:
   level:
     org.springframework.cloud.config: DEBUG
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
 management:
   endpoints:
     web:

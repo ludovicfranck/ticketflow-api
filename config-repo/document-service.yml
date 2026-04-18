@@ -30,3 +30,7 @@ spring:
       path: /v3/api-docs
     swagger-ui:
       path: /swagger-ui.html
+
+management:
+  tracing:
+    enabled: true

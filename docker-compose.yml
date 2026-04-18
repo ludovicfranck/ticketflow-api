@@ -170,11 +170,15 @@ services:
 # config-server
   config-server:
     build: ./config-server
-    container_name: ticketflow-config
+    container_name: ticketflow-config-server
     ports:
       - "8888:8888"
+    volumes:
+      # On lie le dossier Windows au dossier interne du container
+      - "D:/PROJETS SPRING BOOT/ticketflow/config-repo:/app/config-repo"
     environment:
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=native
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/app/config-repo
     depends_on:
       - eureka-server
     networks:
@@ -187,11 +191,16 @@ services:
     ports:
       - "8081:8081"
     environment:
-      DATABASE_URL: postgresql://admin:admin@postgres:5432/user_service_db
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      SPRING_AUTH_SERVER_URL: http://keycloak:8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_service_db
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_AUTH_SERVER_URL: http://keycloak:8180
     depends_on:
       postgres:
         condition: service_healthy
@@ -199,6 +208,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      config-server:
+        condition: service_started
     networks:
       - ticketflow-net
 # -----ticket-service
@@ -208,12 +219,16 @@ services:
     ports:
       - "8082:8082"
     environment:
-      DATABASE_URL: postgresql://admin:admin@postgres:5432/ticket_service_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticket_service_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_AUTH_SERVER_URL: http://keycloak:8180
     depends_on:
       postgres:
         condition: service_healthy
@@ -221,6 +236,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      config-server:
+        condition: service_started
       user-service:
         condition: service_started
     networks:
@@ -232,12 +249,16 @@ services:
     ports:
       - "8083:8083"
     environment:
-      DATABASE_URL: postgresql://admin:admin@postgres:5432/notification_service_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/notification_service_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      SPRING_AUTH_SERVER_URL: http://keycloak:8180
     depends_on:
       postgres:
         condition: service_healthy
@@ -245,6 +266,8 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      config-server:
+        condition: service_started
     networks:
       - ticketflow-net
 
@@ -255,15 +278,19 @@ services:
     ports:
       - "8084:8084"
     environment:
-      DATABASE_URL: postgresql://admin:admin@postgres:5432/document_service_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/user_service_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_AUTH_SERVER_URL: http://keycloak:8180
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       MINIO_URL: http://minio:9000
       MINIO_ACCESS_KEY: minioadmin
       MINIO_SECRET_KEY: minioadmin
-      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
     depends_on:
       postgres:
         condition: service_healthy
@@ -273,25 +300,38 @@ services:
         condition: service_healthy
       eureka-server:
         condition: service_healthy
+      config-server:
+        condition: service_started
     networks:
       - ticketflow-net
 
 # api-gateway
   api-gateway:
     build: ./api-gateway
-    container_name: ticketflow-gateway
+    container_name: ticketflow-api-gateway
     ports:
       - "8080:8080"
     environment:
-      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080
+      # 1. Configuration du Config Server
+      SPRING_CLOUD_CONFIG_URI: http://config-server:8888
+      SPRING_CONFIG_IMPORT: http://config-server:8888/
+      # 2. Discovery Service
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+      # 3. Sécurité / Keycloak
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8180
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8180/realms/ticketflow/protocol/openid-connect/token
     depends_on:
       eureka-server:
         condition: service_healthy
       user-service:
         condition: service_started
       ticket-service:
+        condition: service_started
+      document-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      config-server:
         condition: service_started
     networks:
       - ticketflow-net

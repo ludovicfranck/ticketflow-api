@@ -10,12 +10,71 @@ spring:
   application:
     name: api-gateway
   config:
-    import: "optional:configserver:http://localhost:8888"
+    import: "optional:configserver:http://config-server:8888/"
 
   cloud:
     gateway:
+      #      Gestion des Cross Origin Ressource Sharing (CORS)
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:3000" #[OPTIONS] http://localhost:8080/api/users qui doit etre permis.
+            allowedMethods: [ "GET","POST","PUT","OPTIONS" ]
+            allowedHeaders: "*"
+      #      Gestion des Routes ------------
       routes:
+        #        - Routes correspondants au user-service ----
+        #        les requetes api/users/** ->(seront redirige vers) user-service en appelant le load balancer via Eureka
+        # ----- user-service-----------
         - id: user-service
           uri: lb://user-service
           predicates:
             - Path=/api/users/**
+          filters:
+            - StripPrefix=0
+            #            Gestion de la limitation de debit
+            - name: RequestRateLimiter
+              args:
+                replenishRate: 5
+                burstCapacity: 10
+                keyResolver: "#{@userKeyResolver}"
+        #-------- ticket-service----------
+        - id: ticket-service
+          uri: lb://ticket-service
+          predicates:
+            - Path=/api/tickets/**
+          filters:
+            - StripPrefix=0
+            - name: RequestRateLimiter
+              args:
+                replenishRate: 5
+                burstCapacity: 10
+                keyResolver: "#{@userKeyResolver}"
+        #-------- notification-service----------
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - StripPrefix=0
+            - name: RequestRateLimiter
+              args:
+                replenishRate: 5
+                burstCapacity: 10
+                keyResolver: "#{@userKeyResolver}"
+        #-------- document-service----------
+        - id: document-service
+          uri: lb://document-service
+          predicates:
+            - Path=/api/documents/**
+          filters:
+            - StripPrefix=0
+            - name: RequestRateLimiter
+              args:
+                replenishRate: 5
+                burstCapacity: 10
+                keyResolver: "#{@userKeyResolver}
+
+management:
+  tracing:
+    enabled: true
