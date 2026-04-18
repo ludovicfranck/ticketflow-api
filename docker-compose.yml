@@ -159,6 +159,11 @@ services:
     container_name: ticketflow-eureka
     ports:
       - "8761:8761"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - ticketflow-net
 
