@@ -6,6 +6,10 @@ import com.ticketflow.notification_service.entity.Notification;
 import com.ticketflow.notification_service.entity.NotificationStatus;
 import com.ticketflow.notification_service.entity.NotificationType;
 import com.ticketflow.notification_service.repository.NotificationRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +23,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/notifications")
 @RequiredArgsConstructor
 @Slf4j
-
+@Tag(name = "NotificationController" , description = "Gestion des notifications ")
 public class NotificationController {
     private final NotificationRepository notificationRepository;
 
@@ -30,11 +34,17 @@ public class NotificationController {
      */
     @GetMapping("/history")
     @PreAuthorize("hasAuthority('notification:read')")
+    @Operation(summary = "Lister tous les notifications" , description = "Recupere et affiche l'historique des notifications")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201" , description = "Liste recupere avec succes"),
+            @ApiResponse(responseCode = "400" , description = "Corps de la requete invalide"),
+            @ApiResponse(responseCode = "403" , description = "Scope notification:read manquant")
+    })
     public ResponseEntity<List<NotificationResponse>> getHistory() {
         List<NotificationResponse> history = notificationRepository
                 .findAllByOrderBySentAtDesc()
                 .stream()
-                .map(this::mapNotificationToNotificationResponse)
+                .map(notification -> mapNotificationToNotificationResponse(notification))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(history);
     }
@@ -55,6 +65,11 @@ public class NotificationController {
      */
     @PostMapping("/send")
     @PreAuthorize("hasAuthority('notification:send')")
+    @Operation(summary = "envoi d'une notification" , description = "Envoi manuel d'une notification")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201" , description = "Notification envoye avec success"),
+            @ApiResponse(responseCode = "403" , description = "Acces refuse car scope notification:send absente")
+    })
     public ResponseEntity<NotificationResponse> sendManual(@RequestBody SendNotificationRequest request) {
         log.info("[NOTIFICATION] Envoi manuel vers {}", request.getRecipient());
 

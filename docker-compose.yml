@@ -42,6 +42,9 @@ services:
     command: start-dev
     networks:
       - ticketflow-net
+    volumes:
+      - keycloak_data:/opt/keycloak/data # Ajoute ceci
+       #keycloak_data:/opt/keycloak/data
 
 
   minio:
@@ -292,3 +295,4 @@ networks:
 volumes:
   postgres_data:
   minio_data:
+  keycloak_data:
