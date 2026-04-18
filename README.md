@@ -64,11 +64,11 @@ Infrastructure complémentaire :
 ## Prérequis
 
 | Outil        | Version minimale |
-|--------------|-----------------|
-| Docker       | 24+             |
-| Docker Compose | 2.20+         |
-| Java JDK     | 17+             |
-| Maven        | 3.9+            |
+|--------------|------------------|
+| Docker       | 24+              |
+| Docker Compose | 2.20+            |
+| Java JDK     | 21+              |
+| Maven        | 3.9+             |
 
 ---
 
@@ -380,8 +380,6 @@ ticketflow/
 ├── docker-compose.yml        # Infrastructure complète
 ├── prometheus.yml            # Configuration scraping
 ├── init-db.sql               # Initialisation schémas PostgreSQL
-├── keycloak/
-│   └── realm-ticketflow.json # Realm Keycloak (rôles, users, scopes)
 ├── config-repo/              # Configurations Git centralisées
 │   └── application.yml       # Config commune à tous les services
 ├── eureka-server/            # Service Discovery (port 8761)
