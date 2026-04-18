@@ -36,9 +36,10 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
       KC_HOSTNAME_STRICT: "false"
       KC_HTTP_ENABLED: "true"
+      KC_HTTP_PORT: "8180"
 
     ports:
-      - "8180:8080"
+      - "8180:8180"
     command: start-dev
     networks:
       - ticketflow-net
@@ -93,6 +94,8 @@ services:
     image: openzipkin/zipkin
     ports:
       - "9411:9411"
+    networks:
+      - ticketflow-net
 #  -- pour le monitoring et la surveillance | observabilite
 
   prometheus:
@@ -160,7 +163,7 @@ services:
     ports:
       - "8761:8761"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8761/actuator/health" ]
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:8761/actuator/health >/dev/null 2>&1 || exit 1" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -174,8 +177,8 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      # On lie le dossier Windows au dossier interne du container
-      - "D:/PROJETS SPRING BOOT/ticketflow/config-repo:/app/config-repo"
+      # Volume portable (Linux/macOS/Windows via chemin relatif du repo)
+      - "./config-repo:/app/config-repo:ro"
     environment:
       - SPRING_PROFILES_ACTIVE=native
       - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/app/config-repo
