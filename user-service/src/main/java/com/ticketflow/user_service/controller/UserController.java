@@ -107,6 +107,10 @@ public class UserController {
     @GetMapping("/permissions")
     @PreAuthorize("hasAuthority(user:read)")
     @Operation(summary = "Lister toutes les permissions disponibles")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200" , description = "Liste des permissions | scopes recupere avec succes"),
+            @ApiResponse(responseCode = "403" , description = "scope user:read manquant dans le token")
+    })
     public ResponseEntity<Set<PermissionResponse>> getAllPermissions(){
         return ResponseEntity.ok(userService.getAllPermissions());
     }
