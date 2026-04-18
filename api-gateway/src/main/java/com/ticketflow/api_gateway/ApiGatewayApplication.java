@@ -9,11 +9,7 @@ import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-//import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.context.annotation.Bean;
-import reactor.core.publisher.Mono;
-
-import java.util.Objects;
 
 @SpringBootApplication
 @EnableDiscoveryClient
@@ -40,15 +36,11 @@ public class ApiGatewayApplication {
 		SpringApplication.run(ApiGatewayApplication.class, args);
 	}
 
-//    @Bean
-//    public KeyResolver userKeyResolver() {
-//        return exchange -> Mono.just(Objects.requireNonNull(exchange.getRequest().getRemoteAddress()).getAddress().getHostAddress());
-//    }
-//    @Bean
-//    public GroupedOpenApi gatewayApi() {
-//        return GroupedOpenApi.builder()
-//                .group("api-gateway")
-//                .pathsToMatch("/**")
-//                .build();
-//    }
+    @Bean
+    public GroupedOpenApi gatewayApi() {
+        return GroupedOpenApi.builder()
+                .group("api-gateway")
+                .pathsToMatch("/**")
+                .build();
+    }
 }
