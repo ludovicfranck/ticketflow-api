@@ -11,6 +11,7 @@ spring:
 
   cloud:
     config:
+      enabled: false
       server:
         native:
           search-locations: file:/app/config-repo
@@ -28,6 +29,8 @@ eureka:
       defaultZone: http://eureka-server:8761/eureka/
 management:
   endpoints:
+    health:
+      show-details: always
     web:
       exposure:
         include: "health,info,prometheus,metrics"

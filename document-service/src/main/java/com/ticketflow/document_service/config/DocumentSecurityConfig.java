@@ -22,9 +22,9 @@ public class DocumentSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "swagger-ui/**",
-                                 "swagger-ui.html",
-                                 "v3/api-docs/**",
+                                "/swagger-ui/**",
+                                 "/swagger-ui.html",
+                                 "/v3/api-docs/**",
                                  "/actuator/**"
                         ).permitAll().anyRequest().authenticated()
                 )

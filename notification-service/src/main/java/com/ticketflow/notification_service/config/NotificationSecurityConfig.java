@@ -14,7 +14,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity
 @Slf4j
 public class NotificationSecurityConfig {
 
@@ -25,7 +25,7 @@ public class NotificationSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/swagger-ui/**",
-                                "swagger-ui.html",
+                                "/swagger-ui.html",
                                 "/v3/api-docs/**" ,
                                 "/actuator/**"
                         ).permitAll()

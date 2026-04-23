@@ -23,7 +23,7 @@ scrape_configs:
     static_configs:
       - targets: ['document-service:8084']
 
-  - job_name: 'api-gateway'
+  - job_name: 'gateway-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['api-gateway:8080']
+      - targets: ['gateway-service:8080']

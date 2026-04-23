@@ -8,7 +8,7 @@ eureka:
 
 spring:
   application:
-    name: api-gateway
+    name: gateway-service
   config:
     import: "optional:configserver:http://config-server:8888/"
 
@@ -86,19 +86,19 @@ springdoc:
     path: /swagger-ui.html
     urls:
       - name: API Gateway (TicketFlow)
-        url: /v3/api-docs/api-gateway
+        url: gateway-service/v3/api-docs
       - name: User Service
-        url: /user-service/v3/api-docs
+        url: /api/users/v3/api-docs
       - name: Ticket Service
-        url: /ticket-service/v3/api-docs
+        url: /api/tickets/v3/api-docs
       - name: Document Service
-        url: /document-service/v3/api-docs
+        url: /api/documents/v3/api-docs
       - name: Notification Service
-        url: /notification-service/v3/api-docs
+        url: /api/notifications/v3/api-docs
   api-docs:
     enabled: true
     path: /v3/api-docs
-#---------Zipkin
+#---------Zipkin && Prometheus
 management:
   tracing:
     enabled: false

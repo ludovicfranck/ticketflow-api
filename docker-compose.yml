@@ -176,14 +176,21 @@ services:
     container_name: ticketflow-config-server
     ports:
       - "8888:8888"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     volumes:
       # Volume portable (Linux/macOS/Windows via chemin relatif du repo)
       - "./config-repo:/app/config-repo:ro"
     environment:
       - SPRING_PROFILES_ACTIVE=native
       - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/app/config-repo
+      - SPRING_CLOUD_CONFIG_ENABLED=false
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_healthy
     networks:
       - ticketflow-net
 
@@ -201,7 +208,7 @@ services:
 
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_AUTH_SERVER_URL: http://keycloak:8180
     depends_on:
@@ -212,7 +219,7 @@ services:
       eureka-server:
         condition: service_healthy
       config-server:
-        condition: service_started
+        condition: service_healthy
     networks:
       - ticketflow-net
 # -----ticket-service
@@ -229,7 +236,7 @@ services:
 
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_AUTH_SERVER_URL: http://keycloak:8180
     depends_on:
@@ -240,7 +247,7 @@ services:
       eureka-server:
         condition: service_healthy
       config-server:
-        condition: service_started
+        condition: service_healthy
       user-service:
         condition: service_started
     networks:
@@ -259,7 +266,7 @@ services:
 
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       SPRING_AUTH_SERVER_URL: http://keycloak:8180
     depends_on:
@@ -270,7 +277,7 @@ services:
       eureka-server:
         condition: service_healthy
       config-server:
-        condition: service_started
+        condition: service_healthy
     networks:
       - ticketflow-net
 
@@ -288,7 +295,7 @@ services:
 
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
       SPRING_AUTH_SERVER_URL: http://keycloak:8180
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
       MINIO_URL: http://minio:9000
@@ -304,12 +311,12 @@ services:
       eureka-server:
         condition: service_healthy
       config-server:
-        condition: service_started
+        condition: service_healthy
     networks:
       - ticketflow-net
 
 # api-gateway
-  api-gateway:
+  gateway-service:
     build: ./api-gateway
     container_name: ticketflow-api-gateway
     ports:
@@ -317,9 +324,10 @@ services:
     environment:
       # 1. Configuration du Config Server
       SPRING_CLOUD_CONFIG_URI: http://config-server:8888
-      SPRING_CONFIG_IMPORT: optional:configserver:http://config-server:8888/
+      SPRING_CONFIG_IMPORT: configserver:http://config-server:8888/
       # 2. Discovery Service
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS : true
       # 3. Sécurité / Keycloak
       KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8180
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8180/realms/ticketflow/
@@ -335,7 +343,7 @@ services:
 #      notification-service:
 #        condition: service_started
       config-server:
-        condition: service_started
+        condition: service_healthy
     networks:
       - ticketflow-net
 networks:

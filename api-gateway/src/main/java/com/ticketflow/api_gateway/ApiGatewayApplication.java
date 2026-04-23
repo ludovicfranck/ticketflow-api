@@ -11,7 +11,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 
-@SpringBootApplication
 @EnableDiscoveryClient
 @OpenAPIDefinition(info = @Info(
         title = "Api Gateway of Ticketflow Api",
@@ -31,6 +30,7 @@ import org.springframework.context.annotation.Bean;
                 description = "Documentation of ticketflow API",
                 url = "https://github.com/ludovicfranck/ticketflow-api.git"
         ))
+@SpringBootApplication
 public class ApiGatewayApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ApiGatewayApplication.class, args);
@@ -39,7 +39,7 @@ public class ApiGatewayApplication {
     @Bean
     public GroupedOpenApi gatewayApi() {
         return GroupedOpenApi.builder()
-                .group("api-gateway")
+                .group("gateway-service")
                 .pathsToMatch("/**")
                 .build();
     }

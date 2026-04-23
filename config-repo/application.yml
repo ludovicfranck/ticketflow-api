@@ -3,7 +3,7 @@
 # Héritée automatiquement par chaque service
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/ticketflow
+    url: jdbc:postgresql://postgres:5432/ticketflow
     username: admin
     password: admin
     driver-class-name: org.postgresql.Driver
@@ -17,7 +17,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -32,8 +32,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}/realms/ticketflow
-          jwk-set-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://localhost:8180}/realms/ticketflow/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://keycloak:8180}/realms/ticketflow
+          jwk-set-uri: ${KEYCLOAK_AUTH_SERVER_URL:http://keycloak:8180}/realms/ticketflow/protocol/openid-connect/certs
           authority-prefix: "" #  gestion manuelle dans le code au-dessus
           authorities-claim-name: authorities
 
@@ -42,7 +42,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metrics,circuitbreakers
+        include: "health,info,prometheus,metrics,circuitbreakers"
   endpoint:
     health:
       show-details: always
