@@ -61,21 +61,21 @@ public class UserServiceImplementation implements UserService{
     /*
     * Cette methode agit comme un mapper en transformant User -> UserResponse
     */
-    private UserResponse mapToUserResponse(User user) {
+    public UserResponse mapToUserResponse(User user) {
         // Extraction du nom des roles
-        Set<String> roles = user.getRoles().stream()
-                .map(role -> role.getName())
-                .collect(Collectors.toSet());
-        // Extraction du nom des permissions
-        Set<String> permissions = user.getEffectivePermissions();
+//        Set<String> roles = user.getRoles().stream()
+//                .map(role -> role.getName())
+//                .collect(Collectors.toSet());
+//        // Extraction du nom des permissions
+//        Set<String> permissions = user.getEffectivePermissions();
         return UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
-                .roles(roles)
-                .permissions(permissions)
+//                .roles(roles)
+//                .permissions(permissions)
                 .build();
     }
 
@@ -121,7 +121,7 @@ public class UserServiceImplementation implements UserService{
     /**
      * Cette methode transforme un Role -> RoleResponse ...
      */
-    private RoleResponse mapToRoleResponse(Role role) {
+    public RoleResponse mapToRoleResponse(Role role) {
         return RoleResponse.builder()
                 .id(role.getId())
                 .name(role.getName())

@@ -13,7 +13,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +45,7 @@ public class UserSecurityConfig {
     /**
      * Convertisseur JWT personnalise pour Keycloak
      */
-    private Converter<Jwt,? extends AbstractAuthenticationToken> keycloakJwtConverter() {
+    public Converter<Jwt,? extends AbstractAuthenticationToken> keycloakJwtConverter() {
         return new Converter<Jwt, AbstractAuthenticationToken>() {
             @Override
             public AbstractAuthenticationToken convert(Jwt jwt) {
@@ -77,5 +76,14 @@ public class UserSecurityConfig {
                 return new JwtAuthenticationToken(jwt, authorities);
             }
         };
+    }
+
+    /**
+     * Convertisseur pour permettre les requetes a l'exterieur de l'environnement de Docker keycloak:8180 -> localhost:8180
+     */
+    @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        String jwkSetUri = "http://keycloak:8180/realms/ticketflow/protocol/openid-connect/certs";
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
 }

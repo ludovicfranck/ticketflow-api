@@ -27,7 +27,7 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority(ticket:create)")
+    @PreAuthorize("hasAuthority('ticket:create')")
     @Operation(summary = "Creer un ticket",
         description = "Creer un ticket + Synchronisation avec Keycloak +  Message via Kafka"
     )
@@ -41,7 +41,7 @@ public class TicketController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority(ticket:read)")
+    @PreAuthorize("hasAuthority('ticket:read')")
     @Operation(summary = "Recuperer tous les tickets" ,
             description = "Retourne une liste paginée ")
     @ApiResponses({
@@ -54,7 +54,7 @@ public class TicketController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority(ticket:read)")
+    @PreAuthorize("hasAuthority('ticket:read')")
     @Operation(summary = "Recuperer un ticket",
               description = "Retourne les informations d'un ticket"
     )

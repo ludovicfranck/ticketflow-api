@@ -12,7 +12,7 @@ public class KeycloakConfig {
     @Bean
     public Keycloak keycloak() {
         return KeycloakBuilder.builder()
-                .serverUrl("http://localhost:8180") // L'URL de ton Keycloak Docker
+                .serverUrl("http://keycloak:8180") // L'URL de ton Keycloak Docker
                 .realm("master")                    // Toujours "master" pour l'admin
                 .grantType(OAuth2Constants.PASSWORD)
                 .clientId("admin-cli")

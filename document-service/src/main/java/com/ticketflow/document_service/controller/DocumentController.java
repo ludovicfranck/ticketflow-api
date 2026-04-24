@@ -23,7 +23,7 @@ public class DocumentController {
 
     // uploade un document
     @PostMapping(value = "/upload",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAuthority(document:upload)")
+    @PreAuthorize("hasAuthority('document:upload')")
     @Operation(summary = "Televerser|uploader un document" , description = "Sauvegarde un document dans la Bd + minio + kafka")
     @ApiResponses({
             @ApiResponse(responseCode = "201" , description = "Document uploade avec succes"),
@@ -36,7 +36,7 @@ public class DocumentController {
 
     // Recuperer les Metadonnees d'un document ...
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority(document:read)")
+    @PreAuthorize("hasAuthority('document:read')")
     @Operation(summary = "Lire un document" , description = "Recupere et affiche les info d'un document")
     @ApiResponses({
             @ApiResponse(responseCode = "200" , description = "Document recupere avec succes"),
@@ -48,7 +48,7 @@ public class DocumentController {
 
     // Telecharger un document a partir de son url presignee genere...
     @GetMapping("/{id}/download")
-    @PreAuthorize("hasAuthority(document:download)")
+    @PreAuthorize("hasAuthority('document:download')")
     @Operation(summary = "Telecharger un document" , description = "Telecharger un document a partir de l'url presignee")
     @ApiResponses({
             @ApiResponse(responseCode = "200" , description = "Document telecharge avec succes"),

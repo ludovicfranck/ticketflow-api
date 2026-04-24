@@ -31,7 +31,7 @@ public class UserController {
             @ApiResponse(responseCode = "403", description = "Scope user:create manquant")
     })
     @PostMapping("/users")
-    @PreAuthorize("hasAuthority(user:create)")
+    @PreAuthorize("hasAuthority('user:create')")
     // creer un nouvel utilisateur ....
     public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest userRequest){
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userRequest));
@@ -39,7 +39,7 @@ public class UserController {
 
     // get un user par son id ...
     @GetMapping("/users/{id}")
-    @PreAuthorize("hasAuthority(user:read)")
+    @PreAuthorize("hasAuthority('user:read')")
     @Operation(summary = "Récupérer un utilisateur par ID",
             description = "Retourne l'utilisateur avec ses rôles et permissions effectives")
     @ApiResponses({
@@ -61,14 +61,14 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "Utilisateur ou rôle introuvable")
     })
     @PutMapping("/users/{id}/roles")
-    @PreAuthorize("hasAuthority(user:manage-roles)")
+    @PreAuthorize("hasAuthority('user:manage-roles')")
     public ResponseEntity<UserResponse> assignRoleToUser(@PathVariable String id , @RequestBody Set<String> roleNames){
         return ResponseEntity.ok(userService.addRoleToUser(id , roleNames));
     }
 
     // creer un nouveau role
     @PostMapping("/roles")
-    @PreAuthorize("hasAuthority(user:manage-roles)")
+    @PreAuthorize("hasAuthority('user:manage-roles')")
     @Operation(summary = "Créer un nouveau rôle",
             description = "Crée le rôle en BDD et dans Keycloak")
     @ApiResponses({
@@ -81,7 +81,7 @@ public class UserController {
     }
     // Lister tous les roles
     @GetMapping("/roles")
-    @PreAuthorize("haAuthority(user:read)")
+    @PreAuthorize("haAuthority('user:read')")
     @Operation(summary = "Lister tous les rôles",
             description = "Retourne tous les rôles avec leurs permissions associées")
     public ResponseEntity<Set<RoleResponse>> getAllRoles(){
@@ -90,7 +90,7 @@ public class UserController {
 
     // Associer des permissions a un role
     @PutMapping("/{id}/roles/permissions")
-    @PreAuthorize("hasAuthority(user:manage-roles)")
+    @PreAuthorize("hasAuthority('user:manage-roles')")
     @Operation(summary = "Associer des permissions à un rôle",
             description = "Remplace les permissions du rôle et synchronise Keycloak. " +
                     "Tous les utilisateurs portant ce rôle héritent des nouvelles permissions.")
@@ -105,7 +105,7 @@ public class UserController {
 
     // Lister toutes les permissions disponibles ...
     @GetMapping("/permissions")
-    @PreAuthorize("hasAuthority(user:read)")
+    @PreAuthorize("hasAuthority('user:read')")
     @Operation(summary = "Lister toutes les permissions disponibles")
     @ApiResponses({
             @ApiResponse(responseCode = "200" , description = "Liste des permissions | scopes recupere avec succes"),
