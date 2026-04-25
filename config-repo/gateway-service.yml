@@ -14,6 +14,9 @@ spring:
 
   cloud:
     gateway:
+      default-filters:
+        - PreserveHostHeader
+        - AddRequestHeader=Authorization, #{request.headers['Authorization']}
       discovery:
         locator:
           lower-case-service-id: true

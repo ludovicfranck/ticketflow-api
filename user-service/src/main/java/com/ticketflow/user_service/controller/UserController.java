@@ -81,7 +81,7 @@ public class UserController {
     }
     // Lister tous les roles
     @GetMapping("/roles")
-    @PreAuthorize("haAuthority('user:read')")
+    @PreAuthorize("hasAuthority('user:read')")
     @Operation(summary = "Lister tous les rôles",
             description = "Retourne tous les rôles avec leurs permissions associées")
     public ResponseEntity<Set<RoleResponse>> getAllRoles(){

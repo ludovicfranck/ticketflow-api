@@ -58,21 +58,21 @@ public class UserSecurityConfig {
                             .map(simpleGrantedAuthorities -> new SimpleGrantedAuthority(simpleGrantedAuthorities))
                             .forEach(simpleGrantedAuthority -> authorities.add(simpleGrantedAuthority));
                 }
-                // 2. Extraction des RÔLES (ex: ADMIN , AGENT ..) depuis le claim "roles"
-                List<String> rolesClaim = jwt.getClaimAsStringList("roles");
-                if (rolesClaim != null) {
-                    rolesClaim.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
-                }
-
-                // 3 Fallback : realm_access.authorities (permissions ou sous roles keycloak standard)
-                Map<String , Object> realmAccess = jwt.getClaimAsMap("realm_access");
-                if (realmAccess != null && realmAccess.containsKey("roles")){
-                    List<String> realmRoles = (List<String>) realmAccess.get("roles");
-                    realmRoles.forEach(role ->authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
-                }
-                log.debug("[SECURITY] Authorities extraites : {}" , authorities.stream()
-                        .map(grantedAuthority -> grantedAuthority.getAuthority())
-                        .collect(Collectors.joining(", ")));
+//                // 2. Extraction des RÔLES (ex: ADMIN , AGENT ..) depuis le claim "roles"
+//                List<String> rolesClaim = jwt.getClaimAsStringList("roles");
+//                if (rolesClaim != null) {
+//                    rolesClaim.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+//                }
+//
+//                // 3 Fallback : realm_access.authorities (permissions ou sous roles keycloak standard)
+//                Map<String , Object> realmAccess = jwt.getClaimAsMap("realm_access");
+//                if (realmAccess != null && realmAccess.containsKey("roles")){
+//                    List<String> realmRoles = (List<String>) realmAccess.get("roles");
+//                    realmRoles.forEach(role ->authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+//                }
+//                log.debug("[SECURITY] Authorities extraites : {}" , authorities.stream()
+//                        .map(grantedAuthority -> grantedAuthority.getAuthority())
+//                        .collect(Collectors.joining(", ")));
                 return new JwtAuthenticationToken(jwt, authorities);
             }
         };
@@ -83,7 +83,7 @@ public class UserSecurityConfig {
      */
     @Bean
     public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
-        String jwkSetUri = "http://keycloak:8180/realms/ticketflow/protocol/openid-connect/certs";
+        String jwkSetUri = "http://localhost:8180/realms/ticketflow/protocol/openid-connect/certs";
         return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
     }
 }
