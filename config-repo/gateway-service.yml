@@ -40,6 +40,7 @@ spring:
             - Path=/api/users/**
           filters:
             - StripPrefix=0
+            - TokenRelay=
             #            Gestion de la limitation de debit
             - name: RequestRateLimiter
               args:
@@ -53,6 +54,7 @@ spring:
             - Path=/api/tickets/**
           filters:
             - StripPrefix=0
+            - TokenRelay=
             - name: RequestRateLimiter
               args:
                 replenishRate: 5
@@ -65,6 +67,7 @@ spring:
             - Path=/api/notifications/**
           filters:
             - StripPrefix=0
+            - TokenRelay=
             - name: RequestRateLimiter
               args:
                 replenishRate: 5
@@ -77,6 +80,7 @@ spring:
             - Path=/api/documents/**
           filters:
             - StripPrefix=0
+            - TokenRelay=
             - name: RequestRateLimiter
               args:
                 replenishRate: 5
