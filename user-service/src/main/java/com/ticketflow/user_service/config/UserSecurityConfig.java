@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import java.util.HashSet;
@@ -57,22 +58,21 @@ public class UserSecurityConfig {
                     authoritiesClaim.stream()
                             .map(simpleGrantedAuthorities -> new SimpleGrantedAuthority(simpleGrantedAuthorities))
                             .forEach(simpleGrantedAuthority -> authorities.add(simpleGrantedAuthority));
+                }// 2. Extraction des RÔLES (ex: ADMIN , AGENT ..) depuis le claim "roles"
+                List<String> rolesClaim = jwt.getClaimAsStringList("roles");
+                if (rolesClaim != null) {
+                    rolesClaim.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
                 }
-//                // 2. Extraction des RÔLES (ex: ADMIN , AGENT ..) depuis le claim "roles"
-//                List<String> rolesClaim = jwt.getClaimAsStringList("roles");
-//                if (rolesClaim != null) {
-//                    rolesClaim.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
-//                }
-//
-//                // 3 Fallback : realm_access.authorities (permissions ou sous roles keycloak standard)
-//                Map<String , Object> realmAccess = jwt.getClaimAsMap("realm_access");
-//                if (realmAccess != null && realmAccess.containsKey("roles")){
-//                    List<String> realmRoles = (List<String>) realmAccess.get("roles");
-//                    realmRoles.forEach(role ->authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
-//                }
-//                log.debug("[SECURITY] Authorities extraites : {}" , authorities.stream()
-//                        .map(grantedAuthority -> grantedAuthority.getAuthority())
-//                        .collect(Collectors.joining(", ")));
+
+                // 3 Fallback : realm_access.authorities (permissions ou sous roles keycloak standard)
+                Map<String , Object> realmAccess = jwt.getClaimAsMap("realm_access");
+                if (realmAccess != null && realmAccess.containsKey("roles")){
+                    List<String> realmRoles = (List<String>) realmAccess.get("roles");
+                    realmRoles.forEach(role -> authorities.add(new SimpleGrantedAuthority("ROLE_" + role)));
+                }
+                log.debug("[SECURITY] Authorities extraites : {}" , authorities.stream()
+                        .map(grantedAuthority -> grantedAuthority.getAuthority())
+                        .collect(Collectors.joining(", ")));
                 return new JwtAuthenticationToken(jwt, authorities);
             }
         };
@@ -83,7 +83,23 @@ public class UserSecurityConfig {
      */
     @Bean
     public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
-        String jwkSetUri = "http://localhost:8180/realms/ticketflow/protocol/openid-connect/certs";
-        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+        // On récupère l'URL configurée dans le docker-compose ou le .yml
+        // Si elle n'existe pas, on met localhost par défaut pour le dev local hors Docker
+        String authServerUrl = System.getenv("SPRING_AUTH_SERVER_URL");
+        if (authServerUrl == null) {
+            authServerUrl = "http://localhost:8180";
+        }
+
+        String jwkSetUri = authServerUrl + "/realms/ticketflow/protocol/openid-connect/certs";
+
+        log.info("[SECURITY] Configuration du décodeur JWT sur l'URI : {}", jwkSetUri);
+
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+
+        // --- SOLUTION AU 401 : On délègue la validation sans vérifier strictement l'Issuer ---
+        // Cela permet d'accepter "localhost" (Postman) alors que le service tourne sur "keycloak" (Docker)
+        jwtDecoder.setJwtValidator(org.springframework.security.oauth2.jwt.JwtValidators.createDefault());
+
+        return jwtDecoder;
     }
 }
